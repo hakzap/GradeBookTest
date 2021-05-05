@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!--Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+        -->
+		<!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+        <!-- Popper JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+		<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.5.1/js/bootstrap.min.js"></script> -->
+		
+        <title>Gradebook: Create A Student</title>
+    </head>
+
+    <body>
+		<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+		  <a class="navbar-brand" href= "{{ url_for('index') }}">Gradebook: create a student</a>
+		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsible_navbar">
+			<span class="navbar-toggler-icon"></span>
+		  </button>
+		  <!-- Navbar info w/mr-auto from https://stackoverflow.com/questions/48068539/how-to-add-space-inbetween-nav-items-in-bootstrap -->
+		  <div class="collapse navbar-collapse" id="collapsible_navbar">
+				<div class="nav navbar-nav navbar-right mr-auto">
+					{% if current_user.is_authenticated %}
+						<a class="nav-item nav-link mx-3 active" href="{{ url_for('logout') }}">Log out</a>
+					{% else %}
+						<a class="nav-item nav-link mx-3 active" href="{{ url_for('login') }}">Log in</a>
+						<a class="nav-item nav-link mx-3 active" href="{{ url_for('create') }}">Create account</a>
+					{% endif %}
+				</div>
+		  </div>  
+		</nav>
+
+        <div class="container">
+			<div>
+				{% if current_user.is_authenticated %}
+            </div>
+            <div>
+                <a href="{{ url_for('student') }}">Return to Students</a>
+                {% if create_success %}
+                    <p>The student was added successfully!</p>
+				{% endif %}
+                <p>Create a student entry below:</p>
+            </div>
+            <div class="row">
+                <form action="." method="POST">
+                  <div class="form-group">
+                    <label for="first_name">First Name:</label>
+                    <input class="form-control" id="first_name" name="first_name" placeholder="Enter first name">
+                  </div>
+                  <div class="form-group">
+                    <label for="last_name">Last Name:</label>
+                    <input class="form-control" id="last_name" name="last_name" placeholder="Enter last name">
+                  </div>
+                  <div class="form-group">
+                    <label for="email_address">Email Address:</label>
+                    <input class="form-control" id="email_address" name="email_address" placeholder="Enter email address">
+                  </div>
+                    <div class="form-group">
+                    <label for="major">Major:</label>
+                    <input class="form-control" id="major" name="major" placeholder="Enter major">
+                  </div>
+                  <button type="submit" class="btn btn-success">Create Student</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+    </body>
+</html>
