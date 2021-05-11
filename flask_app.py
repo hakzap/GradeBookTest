@@ -22,11 +22,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-"""
-Next, we need to add a model. A model is a Python class that specifies the stuff that we want to store in the database;
-SQLAlchemy handles all of the complexities of loading stuff from and storing stuff in MySQL; the price is that we have to specify in detail exactly what we want.
-Here’s the class definition for our model
-"""
+
 @login_manager.user_loader
 def load_user(entered_name):
     return User.query.filter_by(user_name=entered_name).first()
@@ -140,8 +136,8 @@ def create_student():
     return render_template("create_student.html", create_success=True)
 
 
-@app.route("/edit_student/", methods=["GET", "POST"])
-@app.route("/edit_student/<int:edit_ID>", methods=["GET", "POST"])
+@app.route("/edit_student/", methods=["GET"])
+@app.route("/edit_student/<int:edit_ID>", methods=["GET", "PUT", "POST"])
 @login_required
 def edit_student(edit_ID=None):
     if request.method == "GET":
@@ -172,7 +168,7 @@ def edit_student(edit_ID=None):
 
 
 @app.route("/delete_student/", methods=["GET", "POST"])
-@app.route("/delete_student/<delete_ID>", methods=["GET", "POST"])
+@app.route("/delete_student/<delete_ID>", methods=["GET", "POST", "DELETE"])
 @login_required
 def delete_student(delete_ID=None):
     if request.method == "GET":
@@ -242,7 +238,7 @@ def create_assignment():
 
 
 @app.route("/edit_assignment/", methods=["GET", "POST"])
-@app.route("/edit_assignment/<int:edit_ID>", methods=["GET", "POST"])
+@app.route("/edit_assignment/<int:edit_ID>", methods=["GET", "POST", "PUT"])
 @login_required
 def edit_assignment(edit_ID=None):
     if request.method == "GET":
@@ -268,7 +264,7 @@ def edit_assignment(edit_ID=None):
 
 
 @app.route("/delete_assignment/", methods=["GET", "POST"])
-@app.route("/delete_assignment/<delete_ID>", methods=["GET", "POST"])
+@app.route("/delete_assignment/<delete_ID>", methods=["GET", "POST", "DELETE"])
 @login_required
 def delete_assignment(delete_ID=None):
     if request.method == "GET":
@@ -296,14 +292,24 @@ def delete_assignment(delete_ID=None):
 @login_required
 def student_grades(student_get_ID= None):
     if request.method == "GET":
+        grade_return_inner = db.session.query(
+            Student.first_name,
+            Student.last_name,
+            Grade.student_ID,
+            Grade.assignment_ID,
+            Grade.grade).select_from(Student).join(
+            Grade, isouter=True).filter(
+            Grade.student_ID == student_get_ID).subquery()
+
         grade_return = db.session.query(
             Assignment.assignment_ID,
             Assignment.assignment_name,
-            Grade.student_ID,
-            Grade.grade,
-            Student.first_name,
-            Student.last_name
-            ).select_from(Assignment).join(Grade).join(Student).filter(Student.student_ID == student_get_ID)
+            grade_return_inner.c.student_ID,
+            grade_return_inner.c.grade,
+            grade_return_inner.c.first_name,
+            grade_return_inner.c.last_name
+            ).select_from(Assignment).join(
+            grade_return_inner, grade_return_inner.c.assignment_ID == Assignment.assignment_ID, isouter=True)
 
         student_get = db.session.query(
                 Student.student_ID,
@@ -320,7 +326,7 @@ def student_grades(student_get_ID= None):
 
 @app.route("/create_grade/", methods=["GET"])
 @app.route("/create_grade/<assign_get_ID>/<student_get_ID>/", methods=["GET", "POST"])
-def create_grade(assign_get_ID=None, student_get_ID=None):
+def create_grade(assign_get_ID=None, student_get_ID=None, message=None):
     if request.method == "GET":
         if assign_get_ID is not None and student_get_ID is not None:
             assign_return = db.session.query(
@@ -333,7 +339,9 @@ def create_grade(assign_get_ID=None, student_get_ID=None):
                 Student.first_name,
                 Student.last_name
                 ).select_from(Student).filter(Student.student_ID == student_get_ID).first()
-
+            if message == "success":
+                return render_template("create_grade.html", assignment_display=assign_return,
+                                       student_display=student_return, create_success=True)
             return render_template("create_grade.html", assignment_display=assign_return,
                                    student_display=student_return)
         else:
@@ -345,13 +353,13 @@ def create_grade(assign_get_ID=None, student_get_ID=None):
     new_grade.student_ID = student_get_ID
     db.session.add(new_grade)
     db.session.commit()
-    # Can't get this to go back to create_grade without weirdly dropping a URL parameter.
-    # Can't get this to go back to assignment_grades without the assignment ID, which was giving a routing error
-    return redirect(url_for("assignment"))
+
+    return redirect(url_for("create_grade", assign_get_ID=assign_get_ID, student_get_ID=student_get_ID, message="success"))
 
 
-@app.route("/edit_grade/<assign_get_ID>/<student_get_ID>/", methods=["GET", "POST"])
-def edit_grade(assign_get_ID=None, student_get_ID=None):
+@app.route("/edit_grade/<assign_get_ID>/<student_get_ID>/", methods=["GET", "POST", "PUT"])
+@app.route("/edit_grade/<assign_get_ID>/<student_get_ID>/<edit_message>", methods=["GET", "POST", "PUT"])
+def edit_grade(assign_get_ID=None, student_get_ID=None, message=None):
     if request.method == "GET":
         if assign_get_ID is not None and student_get_ID is not None:
             grade_return = db.session.query(
@@ -365,28 +373,28 @@ def edit_grade(assign_get_ID=None, student_get_ID=None):
                                                  Grade.student_ID == student_get_ID,
                                                  Grade.student_ID == Student.student_ID,
                                                  Grade.assignment_ID == Assignment.assignment_ID).first()
-
+            if message == "success":
+                return render_template("edit_grade.html", grade_display=grade_return, edit_success=True)
             return render_template("edit_grade.html", grade_display=grade_return)
         else:
             return render_template("edit_grade.html", grade_display="", no_ID_error=True)
 
     ed_grade = Grade.query.filter_by(assignment_ID=assign_get_ID, student_ID=student_get_ID).first()
     if ed_grade is None:
-        return render_template("edit_grade.html", edit_fail=True)
+        return render_template("edit_grade.html", edit_failure=True)
 
     ed_grade.grade = request.form["grade"]
     db.session.add(ed_grade)
     db.session.commit()
 
-    # Can't get this to go back to edit_grade without weirdly dropping a URL parameter.
-    # Can't get this to go back to assignment_grades without the assignment ID, which was giving a routing error
-    return redirect(url_for("assignment"))
+    return redirect(url_for("edit_grade", assign_get_ID=assign_get_ID, student_get_ID=student_get_ID, message="success"))
+
 
 
 @app.route("/delete_grade/", methods=["GET", "POST"])
-@app.route("/delete_grade/<assign_get_ID>/<student_get_ID>/", methods=["GET", "POST"])
+@app.route("/delete_grade/<assign_get_ID>/<student_get_ID>/", methods=["GET", "POST", "DELETE"])
 @login_required
-def delete_grade(assign_get_ID=None, student_get_ID=None):
+def delete_grade(assign_get_ID=None, student_get_ID=None, message=None):
     if request.method == "GET":
         if assign_get_ID is not None and student_get_ID is not None:
             grade_return = db.session.query(
@@ -398,8 +406,11 @@ def delete_grade(assign_get_ID=None, student_get_ID=None):
                 Student.last_name
                 ).select_from(Assignment).filter(Assignment.assignment_ID == assign_get_ID,
                                                  Student.student_ID == student_get_ID).first()
+            if message == "success":
+                return render_template("delete_grade.html", grade_display=grade_return, delete_success=True)
 
             return render_template("delete_grade.html", grade_display=grade_return)
+
         else:
             return render_template("delete_grade.html", grade_display="", no_ID_error=True)
 
@@ -409,7 +420,7 @@ def delete_grade(assign_get_ID=None, student_get_ID=None):
     db.session.delete(del_grade)
     db.session.commit()
 
-    return render_template("delete_grade.html", delete_success=True)
+    return redirect(url_for("delete_grade", assign_get_ID=assign_get_ID, student_get_ID=student_get_ID, message="success"))
 
 
 # Models
