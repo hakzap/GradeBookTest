@@ -41,24 +41,25 @@
 		</nav>
 
         <div class="container">
-			<div>
-				{% if current_user.is_authenticated %}
-            </div>
+            {% if current_user.is_authenticated %}
             <div>
-               <br> <a href="{{ url_for('assignment') }}">Return to Assignments</a>
-                {% if create_success %}
-                    <p>The grade was added successfully!</p>
-                {% endif %}
-                {% if no_ID_error %}
-                    <p>No IDs!</p>
-				{% endif %}
-                <p>Create a grade entry below:</p>
+                <br><a href="{{ url_for('student') }}">View Students</a>
+                <br><a href="{{ url_for('assignment') }}">View Assignments</a>
+
+                    {% if message %}
+                        <div class="alert alert-warning" role="alert">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <p>Create a grade entry below:</p>
+                    {% endif %}
+            </div>
+                {% if student_display and assignment_display %}
                 <ul>
                     <li>Student ID: {{ student_display.student_ID }}</li>
                     <li>Student ID: {{ student_display.first_name }} {{ student_display.last_name }}</li>
                     <li>Assignment ID: {{ assignment_display.assignment_ID }}</li>
                 </ul>
-            </div>
             <div class="row">
                 <form action="." method="POST">
                   <div class="form-group">
@@ -69,7 +70,8 @@
                 </form>
             </div>
             {% endif %}
-        </div>
+            </div>
+            {% endif %}
 
     </body>
 </html>

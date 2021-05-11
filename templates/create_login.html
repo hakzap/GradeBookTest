@@ -42,17 +42,13 @@
 
         <div class="container">
 			<div>
-				{% if current_user_error %}
-				<p>You are already logged in!</p>
-				{% elif duplicate_user_error %}
-				<p>Choose a different username!</p>
-				{% elif password_error %}
-				<p>Your passwords did not match!</p>
-				{% elif account_success %}
-				<p>Your account was added successfully!</p>
-				{% else %}
-				<p>Create an account below:</p>
-				{% endif %}
+                   {% if message %}
+                        <div class="alert alert-warning" role="alert">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <p>Create an account below:</p>
+                    {% endif %}
             </div>
             <div class="row">
                 <form action="." method="POST">
