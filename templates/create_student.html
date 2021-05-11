@@ -46,10 +46,13 @@
             </div>
             <div>
                 <a href="{{ url_for('student') }}">Return to Students</a>
-                {% if create_success %}
-                    <p>The student was added successfully!</p>
-				{% endif %}
-                <p>Create a student entry below:</p>
+                    {% if message %}
+                        <div class="alert alert-warning" role="alert">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <p>Create a student entry below:</p>
+                    {% endif %}
             </div>
             <div class="row">
                 <form action="." method="POST">

@@ -45,14 +45,16 @@
 				{% if current_user.is_authenticated %}
             </div>
             <div>
-               <br> <a href="{{ url_for('assignment') }}">Return to Assignments</a>
-                {% if create_success %}
-                    <p>The grade was added successfully!</p>
-                {% endif %}
-                {% if no_ID_error %}
-                    <p>No IDs!</p>
+                <br><a href="{{ url_for('student') }}">View Students</a>
+                <br><a href="{{ url_for('assignment') }}">View Assignments</a>
+                <br>
+                {% if message %}
+                    <div class="alert alert-warning" role="alert">
+                        {{ message }}
+                    </div>
+				{% else %}
+				    <p>Edit the grade entry below:</p>
 				{% endif %}
-                <p>Create a grade entry below:</p>
                 <ul>
                     <li>Student ID: {{ grade_display.student_ID }}</li>
                     <li>Student Name: {{ grade_display.first_name }} {{ grade_display.last_name }}</li>

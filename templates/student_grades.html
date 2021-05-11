@@ -18,13 +18,13 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 		<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.5.1/js/bootstrap.min.js"></script> -->
 		
-        <title>Assignment Grades</title>
+        <title>Student Grades</title>
     </head>
 
     <body>
 		<nav class="navbar navbar-expand-md bg-dark navbar-dark">
 		
-		  <a class="navbar-brand" href= "{{ url_for('index') }}">Gradebook: Assignment Grades</a>
+		  <a class="navbar-brand" href= "{{ url_for('index') }}">Gradebook: Student Grades</a>
 		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsible_navbar">
 			<span class="navbar-toggler-icon"></span>
 		  </button>
@@ -66,7 +66,7 @@
 								<td>{{ grade.grade }}</td>
 								{% if grade.grade == None %}
 									<td><a href="{{ url_for('create_grade', assign_get_ID = grade.assignment_ID,
-										student_get_ID = grade.student_ID) }}">Enter Grade</a></td>
+										student_get_ID = student_display.student_ID) }}">Enter Grade</a></td>
 									<td></td>
 								{% else %}
 									<td><a href="{{ url_for('edit_grade', assign_get_ID = grade.assignment_ID,

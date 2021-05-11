@@ -46,13 +46,13 @@
             </div>
             <div>
                 <a href="{{ url_for('assignment') }}">Return to Assignments</a>
-                {% if delete_success %}
-                    <p>The assignment was deleted successfully!</p>
-                {% elif delete_fail %}
-                    <p>Nothing to delete!</p>
-				{% else %}
-				    <p>Delete the assignment entry below:</p>
-				{% endif %}
+                    {% if message %}
+                        <div class="alert alert-warning" role="alert">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <p>Delete an assignment entry below:</p>
+                    {% endif %}
             </div>
             {% if not assignment_display %}
                 <br>
